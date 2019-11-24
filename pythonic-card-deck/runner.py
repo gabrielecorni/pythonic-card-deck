@@ -11,6 +11,9 @@ if __name__ == "__main__":
     deck_fra = Deck.from_country(national_decks.france)
     deck_fra.shuffle()
 
+    deck_uno = Deck.from_country(national_decks.uno)
+    deck_uno.shuffle()
+
     s = 0
     for i in range(60):
         card = deck_ita.draw()
@@ -23,8 +26,8 @@ if __name__ == "__main__":
     print(f"Total points: {s}")
 
     s = 0
-    for i in range(60):
-        card = deck_fra.draw()
+    for i in range(160):
+        card = deck_uno.draw()
         if card:
             s = s + 1
             print(f"{i + 1}) {card}")

@@ -1,6 +1,7 @@
 from collections import namedtuple
 from abc import ABC, abstractmethod
-from core.Card import Card
+from core.Cards import Card
+from functools import reduce
 import numpy as np
 
 
@@ -13,7 +14,7 @@ Suit = namedtuple("Suit", ["name", "symbol"])
 """
 A namedtuple to encapsulate basic attributes for decks.
 """
-BaseDeck = namedtuple("DeckBase", ["suits", "figures", "n_wild"])
+BaseDeck = namedtuple("DeckBase", ["suits", "figures", "wild"])
 
 
 """
@@ -26,7 +27,7 @@ class AbsDeck(ABC):
     Data keys
     """
     EMPTY_DECK = None
-    WILD_CARD = Suit(name="Wild Card", symbol="\U0001f0cf")
+    # WILD_CARD = Suit(name="Wild Card", symbol="\U0001f0cf")
 
     @classmethod
     @abstractmethod
@@ -79,20 +80,21 @@ Deck implementation
 
 
 class Deck(AbsDeck, BaseDeck):
-    def __new__(cls, suits, figures, n_wild, game=None):
+    def __new__(cls, suits, figures, wild, game=None):
         """
         class method, called before init with same arguments
         """
-        return super(BaseDeck, cls).__new__(cls, [suits, figures, n_wild])
+        return super(BaseDeck, cls).__new__(cls, [suits, figures, wild])
 
-    def __init__(self, suits, figures, n_wild, game=None):
+    def __init__(self, suits, figures, wild, game=None):
         """
         Instantiate a deck given suit list, figure list, jolly number
         """
         super().__init__()
         self.n_suits = len(suits)
         self.n_card_per_seed = len(figures)
-        self.n_cards = self.n_suits * self.n_card_per_seed + n_wild
+        self.n_wild, self.wild_types = self.describe()
+        self.n_cards = self.n_suits * self.n_card_per_seed + self.n_wild
 
         self.deck = None
 
@@ -114,8 +116,24 @@ class Deck(AbsDeck, BaseDeck):
         return cls(
             country.suits,
             country.figures,
-            country.n_wild
+            country.wild
         )
+
+    def describe(self):
+        """
+        Count the number of wild cards in the deck.
+        :return: the total amount of wild cards
+        """
+
+        number, kinds = 0, len(self.wild)
+
+        # reduce for len == 1 returns the first element, and fires exception if len == 0
+        if kinds == 1:
+            number = 1
+        elif kinds > 1:
+            number = reduce(lambda x, y: x.amount + y.amount, self.wild)
+
+        return number, kinds
 
     def for_game(self, game):
         """
@@ -150,29 +168,62 @@ class Deck(AbsDeck, BaseDeck):
         :return: the drawn card, or EMPTY_DECK
         """
 
-        # get the next card
+        def get_suit_index(c_idx):
+            """
+
+            :param c_idx:
+            :return:
+            """
+            # The suit index is the integer part of the div
+            return int(card_idx / self.n_card_per_seed)
+
+        def get_figure_index(c_idx):
+            """
+
+            :param c_idx:
+            :return:
+            """
+            pass
+
+        def is_wild(s_idx):
+            """
+
+            :param s_idx:
+            :return:
+            """
+            pass
+
+        def get_wild_index(f_idx):
+            """
+
+            :param f_idx:
+            :return:
+            """
+            pass
+
+        # get the next card index
         card_idx = next(self.deck, self.EMPTY_DECK)
 
         # check if deck is empty
         if card_idx == self.EMPTY_DECK:
             return self.EMPTY_DECK
 
-        # get deck card from index and return it
+        # if not empty, build a Card instance from the next card index, then return it
 
         suit_idx = int(card_idx / self.n_card_per_seed)  # suit index is the integer part of the div
+        figure_value_idx = int(card_idx % self.n_card_per_seed)  # figure value is the module of the div
 
-        if self.n_wild > 0 and suit_idx == self.n_suits:
+        if self.n_wild > 0 and suit_idx == self.n_suits:  # assumption: no deck has more wild cards than cards per seed
             # drawn a wild card!
+            wild_index = int(figure_value_idx / int(self.n_wild / self.wild_types))
             drawn_card = Card(
                 idx=card_idx,
-                figure=self.WILD_CARD.name,
-                suit=self.WILD_CARD.name,
-                symbol=self.WILD_CARD.symbol,
+                figure=self.wild[wild_index].suit.name,
+                suit=self.wild[wild_index].suit.name,
+                symbol=self.wild[wild_index].suit.symbol,
                 value=self.wc_value)
         else:
             # drawn a regular card...
-            figure_value_idx = int(card_idx % self.n_card_per_seed)  # figure value is the module of the div
-
             drawn_card = Card(
                 idx=card_idx,
                 figure=self.figures[figure_value_idx],
