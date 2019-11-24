@@ -1,4 +1,5 @@
-from core.Deck import BaseDeck, Suit
+from core.Deck import BaseDeck
+from core.Suit import Suit
 from core.Cards import Wild
 from parametrizations.Param import Param
 
@@ -52,7 +53,7 @@ Uno
 """
 uno_figures = [str(n) for n in range(0, 10)] + [str(n) for n in range(1, 10)] + 2 * "Skip Reverse +2".split()
 uno_suits = "Red Yellow Green Blue".split()
-uno_symbols = "\U0001f534 \U0001F49b \U0001F49a \U0001F499".split()  # \U00026AB -> black
+uno_symbols = "\U0001f534 \U0001f49b \U0001f49a \U0001f499".split()
 uno_wild_cards = [Wild(suit=Suit(name="Wild", symbol="\U000026ab"), amount=4),
                   Wild(suit=Suit(name="Wild+4", symbol="\U000026ab"), amount=4)]
 

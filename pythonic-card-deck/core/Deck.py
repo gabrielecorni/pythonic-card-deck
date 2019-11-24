@@ -6,12 +6,6 @@ import numpy as np
 
 
 """
-A namedtuple to encapsulate basic attributes for card suits.
-"""
-Suit = namedtuple("Suit", ["name", "symbol"])
-
-
-"""
 A namedtuple to encapsulate basic attributes for decks.
 """
 BaseDeck = namedtuple("DeckBase", ["suits", "figures", "wild"])
@@ -23,11 +17,7 @@ Abstract class for a card deck.
 
 
 class AbsDeck(ABC):
-    """
-    Data keys
-    """
     EMPTY_DECK = None
-    # WILD_CARD = Suit(name="Wild Card", symbol="\U0001f0cf")
 
     @classmethod
     @abstractmethod
@@ -93,7 +83,8 @@ class Deck(AbsDeck, BaseDeck):
         super().__init__()
         self.n_suits = len(suits)
         self.n_card_per_seed = len(figures)
-        self.n_wild, self.wild_types = self.describe()
+        self.wild_types = len(wild)
+        self.n_wild = self.describe()
         self.n_cards = self.n_suits * self.n_card_per_seed + self.n_wild
 
         self.deck = None
@@ -125,15 +116,15 @@ class Deck(AbsDeck, BaseDeck):
         :return: the total amount of wild cards
         """
 
-        number, kinds = 0, len(self.wild)
+        number = 0
 
         # reduce for len == 1 returns the first element, and fires exception if len == 0
-        if kinds == 1:
+        if self.wild_types == 1:
             number = 1
-        elif kinds > 1:
+        elif self.wild_types > 1:
             number = reduce(lambda x, y: x.amount + y.amount, self.wild)
 
-        return number, kinds
+        return number
 
     def for_game(self, game):
         """
@@ -170,36 +161,38 @@ class Deck(AbsDeck, BaseDeck):
 
         def get_suit_index(c_idx):
             """
-
-            :param c_idx:
-            :return:
+            Get the suit index given a card index
+            :param c_idx: next card index
+            :return: the suit index
             """
-            # The suit index is the integer part of the div
-            return int(card_idx / self.n_card_per_seed)
+            # The suit index is the integer part of the division
+            return int(c_idx / self.n_card_per_seed)
 
         def get_figure_index(c_idx):
             """
-
-            :param c_idx:
-            :return:
+            Get the figure index given a card index
+            :param c_idx: next card index
+            :return: the figure index
             """
-            pass
+            # The figure index is the module of the division
+            return int(c_idx % self.n_card_per_seed)
 
         def is_wild(s_idx):
             """
-
-            :param s_idx:
-            :return:
+            Return true if the next card is wild, false otherwise.
+            :param s_idx: the next suit index
+            :return: bool
             """
-            pass
+            # Assumption: no deck has more wild cards than cards per seed
+            return self.n_wild > 0 and s_idx >= self.n_suits
 
         def get_wild_index(f_idx):
             """
-
-            :param f_idx:
-            :return:
+            Specify which kind of wild card has been drawn.
+            :param f_idx: next figure index
+            :return: the next wild card index
             """
-            pass
+            return int(f_idx / int(self.n_wild / self.wild_types))
 
         # get the next card index
         card_idx = next(self.deck, self.EMPTY_DECK)
@@ -210,26 +203,24 @@ class Deck(AbsDeck, BaseDeck):
 
         # if not empty, build a Card instance from the next card index, then return it
 
-        suit_idx = int(card_idx / self.n_card_per_seed)  # suit index is the integer part of the div
-        figure_value_idx = int(card_idx % self.n_card_per_seed)  # figure value is the module of the div
+        suit_idx, figure_idx = get_suit_index(card_idx), get_figure_index(card_idx)
 
-        if self.n_wild > 0 and suit_idx == self.n_suits:  # assumption: no deck has more wild cards than cards per seed
-            # drawn a wild card!
-            wild_index = int(figure_value_idx / int(self.n_wild / self.wild_types))
+        if is_wild(suit_idx):  # drawn a wild card!
+            wild_index = get_wild_index(figure_idx)
             drawn_card = Card(
                 idx=card_idx,
                 figure=self.wild[wild_index].suit.name,
                 suit=self.wild[wild_index].suit.name,
                 symbol=self.wild[wild_index].suit.symbol,
                 value=self.wc_value)
-        else:
-            # drawn a regular card...
+
+        else:  # drawn a regular card...
             drawn_card = Card(
                 idx=card_idx,
-                figure=self.figures[figure_value_idx],
+                figure=self.figures[figure_idx],
                 suit=self.suits[suit_idx][0],
                 symbol=self.suits[suit_idx][1],
-                value=self.values[figure_value_idx])
+                value=self.values[figure_idx])
 
         return drawn_card
 
@@ -239,4 +230,5 @@ class Deck(AbsDeck, BaseDeck):
         :param deck: a different deck
         :return: the merged deck.
         """
+        # TODO: implement it
         pass
