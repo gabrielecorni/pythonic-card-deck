@@ -74,6 +74,8 @@ class Deck(AbsDeck, BaseDeck):
         """
         class method, called before init with same arguments
         """
+        # used to store suits, figures, wild into self.suits, self.figures, self.wild respectively.
+        # this is done by exploiting the namedtuple constructor.
         return super(BaseDeck, cls).__new__(cls, [suits, figures, wild])
 
     def __init__(self, suits, figures, wild, game=None):
@@ -84,7 +86,7 @@ class Deck(AbsDeck, BaseDeck):
         self.n_suits = len(suits)
         self.n_card_per_seed = len(figures)
         self.wild_types = len(wild)
-        self.n_wild = self.describe()
+        self.n_wild = self.count_wild()
         self.n_cards = self.n_suits * self.n_card_per_seed + self.n_wild
 
         self.deck = None
@@ -110,7 +112,7 @@ class Deck(AbsDeck, BaseDeck):
             country.wild
         )
 
-    def describe(self):
+    def count_wild(self):
         """
         Count the number of wild cards in the deck.
         :return: the total amount of wild cards
