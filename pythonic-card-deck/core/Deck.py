@@ -8,7 +8,7 @@ import numpy as np
 """
 A namedtuple to encapsulate basic attributes for decks.
 """
-BaseDeck = namedtuple("DeckBase", ["suits", "figures", "wild"])
+BaseDeck = namedtuple("DeckBase", ["suits", "figures", "wild", "name"])
 
 
 """
@@ -70,19 +70,36 @@ Deck implementation
 
 
 class Deck(AbsDeck, BaseDeck):
-    def __new__(cls, suits, figures, wild, game=None):
+    __slots__ = ()
+
+    def __repr__(self):
+        """
+        The one invoked with: print(deck)
+        :return: narrow string representation
+        """
+        return f"{self.name}"
+
+    def __str__(self):
+        """
+        The one invoked with: print(str(deck))
+        :return: wide string representation
+        """
+        return f"{self.name} deck"
+
+    def __new__(cls, suits, figures, wild, name, game=None):
         """
         class method, called before init with same arguments
         """
         # used to store suits, figures, wild into self.suits, self.figures, self.wild respectively.
         # this is done by exploiting the namedtuple constructor.
-        return super(BaseDeck, cls).__new__(cls, [suits, figures, wild])
+        return super(BaseDeck, cls).__new__(cls, [suits, figures, wild, name])
 
-    def __init__(self, suits, figures, wild, game=None):
+    def __init__(self, suits, figures, wild, name, game=None):
         """
         Instantiate a deck given suit list, figure list, jolly number
         """
         super().__init__()
+
         self.n_suits = len(suits)
         self.n_card_per_seed = len(figures)
         self.wild_types = len(wild)
@@ -97,6 +114,8 @@ class Deck(AbsDeck, BaseDeck):
             self.values = [0] * self.n_card_per_seed
             self.wc_value = 0
 
+        self.shuffle(n_iter=3)
+
     @classmethod
     def from_country(cls, country):
         """
@@ -109,7 +128,8 @@ class Deck(AbsDeck, BaseDeck):
         return cls(
             country.suits,
             country.figures,
-            country.wild
+            country.wild,
+            country.name
         )
 
     def count_wild(self):
@@ -120,11 +140,13 @@ class Deck(AbsDeck, BaseDeck):
 
         number = 0
 
-        # reduce for len == 1 returns the first element, and fires exception if len == 0
-        if self.wild_types == 1:
-            number = 1
-        elif self.wild_types > 1:
+        if self.wild:
             number = reduce(lambda x, y: x.amount + y.amount, self.wild)
+            # reduce() returns the first element of iterable if its len == 1
+            # if len > 1, the reduced value is returned
+            # hence, if reduce returns a Wild obj, extract its amount
+            if type(number) is not int:
+                number = number.amount
 
         return number
 
@@ -214,7 +236,7 @@ class Deck(AbsDeck, BaseDeck):
                 figure=self.wild[wild_index].suit.name,
                 suit=self.wild[wild_index].suit.name,
                 symbol=self.wild[wild_index].suit.symbol,
-                value=self.wc_value)
+                value=self.wc_value[wild_index] if type(self.wc_value) == list else self.wc_value)
 
         else:  # drawn a regular card...
             drawn_card = Card(

@@ -13,7 +13,8 @@ def generate(param):
     return BaseDeck(suits=[Suit(name=s_name, symbol=s_sign)
                            for s_name, s_sign in zip(param.suits, param.symbols)],
                     figures=param.figures,
-                    wild=param.wild)
+                    wild=param.wild,
+                    name=param.name)
 
 
 """
@@ -24,7 +25,8 @@ italian_suits = "Coins Cups Swords Clubs".split()
 italian_symbols = "\U0001f4b0 \U0001f3c6 \U00002694 \U0001f38b".split()
 italian_wild_cards = []
 
-italian_data = Param(figures=italian_figures,
+italian_data = Param(name="Italian",
+                     figures=italian_figures,
                      suits=italian_suits,
                      symbols=italian_symbols,
                      wild=italian_wild_cards)
@@ -40,7 +42,8 @@ french_suits = "Hearts Spades Diamonds Clubs".split()
 french_symbols = "\U00002665 \U00002660 \U00002666 \U00002663".split()
 french_wild_cards = [Wild(suit=Suit(name="Wild Card", symbol="\U0001f0cf"), amount=2)]
 
-french_data = Param(figures=french_figures,
+french_data = Param(name="French",
+                    figures=french_figures,
                     suits=french_suits,
                     symbols=french_symbols,
                     wild=french_wild_cards)
@@ -57,7 +60,8 @@ uno_symbols = "\U0001f534 \U0001f49b \U0001f49a \U0001f499".split()
 uno_wild_cards = [Wild(suit=Suit(name="Wild", symbol="\U000026ab"), amount=4),
                   Wild(suit=Suit(name="Wild+4", symbol="\U000026ab"), amount=4)]
 
-uno_data = Param(figures=uno_figures,
+uno_data = Param(name="UNO",
+                 figures=uno_figures,
                  suits=uno_suits,
                  symbols=uno_symbols,
                  wild=uno_wild_cards)

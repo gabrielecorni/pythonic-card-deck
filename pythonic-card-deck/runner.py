@@ -3,35 +3,30 @@ from parametrizations import national_decks
 from parametrizations import games
 
 
+def print_deck(deck):
+    print("==========")
+    print(str(deck))
+    print()
+
+    empty = False
+    idx = 0
+    while not empty:
+        card = deck.draw()
+        if card:
+            idx = idx + 1
+            print(f"{idx}) {card}")
+        else:
+            empty = True
+
+    print()
+    print()
+
+
 if __name__ == "__main__":
 
-    deck_ita = Deck.from_country(national_decks.italy).for_game(games.briscola)
-    deck_ita.shuffle(n_iter=3)
+    decks = [Deck.from_country(national_decks.italy).for_game(games.briscola),
+             Deck.from_country(national_decks.france),
+             Deck.from_country(national_decks.uno)]
 
-    deck_fra = Deck.from_country(national_decks.france)
-    deck_fra.shuffle()
-
-    deck_uno = Deck.from_country(national_decks.uno)
-    deck_uno.shuffle()
-
-    s = 0
-    for i in range(60):
-        card = deck_ita.draw()
-        if card:
-            s = s + card.value
-            print(f"{i + 1}) {card}")
-        else:
-            break
-
-    print(f"Total points: {s}")
-
-    s = 0
-    for i in range(160):
-        card = deck_uno.draw()
-        if card:
-            s = s + 1
-            print(f"{i + 1}) {card}")
-        else:
-            break
-
-    print(f"Total cards: {s}")
+    for deck_of_cards in decks:
+        print_deck(deck_of_cards)
