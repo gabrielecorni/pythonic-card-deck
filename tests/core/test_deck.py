@@ -3,19 +3,6 @@ from parametrizations import national_decks
 import pytest
 
 
-"""
-fixtures
-"""
-
-
-#
-
-
-"""
-test functions
-"""
-
-
 def count_cards(deck):
     return deck.n_cards
 
